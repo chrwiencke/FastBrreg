@@ -29,7 +29,10 @@ const nameQuery = async (req, res) => {
             return res.status(422).json({ message: "No organization number provided" });
         }
 
-        const exactMatchQuery = brreg.findOne({ navn: name }).limit(5);
+        if (typeof name !== "string") {
+            return res.status(400).json({ message: "Invalid name provided" });
+        }
+        const exactMatchQuery = brreg.findOne({ navn: { $eq: name } }).limit(5);
 
         const similarMatchQuery = brreg.findOne(
             { $text: { $search: name } },
