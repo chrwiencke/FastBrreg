@@ -6,8 +6,8 @@ URL="https://data.brreg.no/enhetsregisteret/api/enheter/lastned"
 # Set MongoDB connection details
 MONGO_HOST="localhost"
 MONGO_PORT="27017"
-DB_NAME="brregorganizations"
-COLLECTION_NAME="enheter"
+DB_NAME="test"
+COLLECTION_NAME="brregorganizations"
 
 # Temporary file to store the downloaded data
 TEMP_FILE="/tmp/brreg_data.gz"
