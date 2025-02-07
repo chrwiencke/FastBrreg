@@ -46,6 +46,13 @@ else
   exit 1
 fi
 
+echo "Recreating indexes on the new collection..."
+
+mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" "$DB_NAME" --eval "
+  db.$COLLECTION_NAME.createIndex({ 'organisasjonsnummer': 1 }, { name: 'organisasjonsnummer_1', unique: true });
+  db.$COLLECTION_NAME.createIndex({ 'navn': 'text' }, { name: 'name' });
+"
+
 # Swap collections to minimize downtime (atomic operation)
 echo "Swapping collections in MongoDB..."
 mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" "$DB_NAME" --eval "
