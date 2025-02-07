@@ -8,6 +8,7 @@ MONGO_HOST="localhost"
 MONGO_PORT="27017"
 DB_NAME="test"
 COLLECTION_NAME="brregorganizations"
+TEMP_COLLECTION_NAME="temp_brregorganizations"
 
 # Temporary file to store the downloaded data
 TEMP_FILE="/tmp/brreg_data.gz"
@@ -33,19 +34,30 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Clear existing data in MongoDB collection
-echo "Clearing existing data in MongoDB..."
-mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" "$DB_NAME" --eval "db.$COLLECTION_NAME.deleteMany({})"
-
-# Import the downloaded data into MongoDB
-echo "Importing data into MongoDB..."
-mongoimport --host "$MONGO_HOST" --port "$MONGO_PORT" --db "$DB_NAME" --collection "$COLLECTION_NAME" --file "$EXTRACTED_FILE" --jsonArray
+# Clear existing data in MongoDB collection (do not delete it, just make sure new data is in a temporary collection)
+echo "Importing data into MongoDB (temporary collection)..."
+mongoimport --host "$MONGO_HOST" --port "$MONGO_PORT" --db "$DB_NAME" --collection "$TEMP_COLLECTION_NAME" --file "$EXTRACTED_FILE" --jsonArray
 
 # Check if import was successful
 if [ $? -eq 0 ]; then
-  echo "Data successfully imported into MongoDB."
+  echo "Data successfully imported into temporary collection."
 else
-  echo "Failed to import data into MongoDB."
+  echo "Failed to import data into temporary collection."
+  exit 1
+fi
+
+# Swap collections to minimize downtime (atomic operation)
+echo "Swapping collections in MongoDB..."
+mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" "$DB_NAME" --eval "
+  db.$COLLECTION_NAME.drop(); 
+  db.$TEMP_COLLECTION_NAME.renameCollection('$COLLECTION_NAME');
+"
+
+# Check if the swap was successful
+if [ $? -eq 0 ]; then
+  echo "Temporary collection successfully swapped with the original collection."
+else
+  echo "Failed to swap collections."
   exit 1
 fi
 
