@@ -5,8 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/app.js & npm run watch:css",
-    "build:css": "npx tailwindcss -o public//style.css --minify",
-    "watch:css": "npx tailwindcss -o public//style.css --watch"
+    "start": "node src/app.js",
+    "build:css": "npx tailwindcss -o public/style.css --minify",
+    "watch:css": "npx tailwindcss -o public/style.css --watch"
     },
   "keywords": [],
   "author": "",
