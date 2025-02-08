@@ -3,7 +3,7 @@ const brreg = require('../models/brregModel.js');
 const { createClient } = require('redis');
 
 const client = createClient({
-    url: 'redis://10.12.2.99:6379',
+    url: process.env.REDIS_URI,
 });
 client.connect();
 
